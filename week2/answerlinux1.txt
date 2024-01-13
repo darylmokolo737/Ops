@@ -1,0 +1,19 @@
+
+
+
+Answer sheet
+
+1. cd i am in home directory
+2.cd i am in /home
+3. cd /etc output debconf.conf  debian_version
+4. 25 files end with *.conf I used the the ls -al command in /etc directory
+5. 29 lines in total. i use cat to see the passwd file.
+6. 5 lines i used the cat command to sed the password file.
+7. i cd then used the command  mkdir test1 
+8. nano file1
+9. rmdir test1
+10. man ls 
+11.history
+12. history | grep "cd"
+13. ls -a Displays all files, including hidden ones but ls -l show long format and the permission
+14 Uptime
