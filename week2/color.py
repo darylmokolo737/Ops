@@ -8,13 +8,13 @@ def main():
     """ This function prompts the user for their name and favorite color. """
     #geting user input
     user_name = input("Hello, What is your name? :  ")
-    #Call the sub1 function with username
+    #Call the color_prompt function with username
 
-    sub1(user_name)
+    color_prompt(user_name)
 
     # Function to process user name and ask for favorite color
 
-def sub1(name):
+def color_prompt(name):
 
     """This function asks the user for their favorite color."""
     #Display a personalized message using the entered name
