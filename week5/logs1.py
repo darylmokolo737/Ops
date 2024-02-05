@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 ### Script to extract iPhone MAC addresses from dhcpd log file.
-### DM-1102024
+### DM-2052024
 import re
 import csv
 
-# Set up initial variables and imports
+# this will set up initial variables and imports
 # < GLOBAL, INITIAL VARIABLES, AND IMPORTS (e.g., import sys) >
 LOG_FILE = "dhcpdsmall.log"
 OUTPUT_FILE = "logs1.txt"
