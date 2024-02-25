@@ -1,8 +1,7 @@
 #!/usr/bin/python3
-import subprocess
 import sys
-import re
 import csv
+from pinglib import pingthis  # Importing pingthis function from the pinglib module
 
 
 def main():
@@ -26,28 +25,7 @@ def main():
             print(f"{result[0]}, {result[1]}")
 
         if output_filename:
-            write_to_csv(results, output_filename)
-
-def pingthis(ipordns, max_attempts=3):
-    """Function to ping the specified IP or domain name."""
-    for _ in range(max_attempts):
-        try:
-           # Run ping command and capture output
-            output = subprocess.check_output(['ping', '-c', '4', ipordns], text=True)
-                                                                                                                                       # Use regex to extract time from output
-            time_match = re.search(r'min/avg/max/stddev = \d+\.\d+/(\d+\.\d+)/\d+\.\d+/\d+\.\d+', output)
-
-            if time_match:
-                time_to_ping = round(float(time_match.group(1)), 2)
-                return [ipordns, str(time_to_ping)]
-            else:
-                return [ipordns, 'Error: Unable to parse ping output.']
-
-        except subprocess.CalledProcessError:
-                                                                                                                                        # Retry if the ping fails
-            continue
-
-    return [ipordns, 'NotFound']          
+            write_to_csv(results, output_filename)        
 
 
 def write_to_csv(results, output_filename):
