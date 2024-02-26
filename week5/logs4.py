@@ -6,14 +6,17 @@ import csv
 import sys
 from collections import defaultdict
 
-# Set up initial variables and imports
-MAIL_LOG_FILE = sys.argv[1]
+# Set up initial variables and imports]
 OUTPUT_FILE = "servers.csv"
 
 # Main routine that is called when the script is run
 def main():
     """Main function to analyze mail log file."""
-    log_data = read_log_file(MAIL_LOG_FILE)
+    if len(sys.argv) != 2:
+        print("Usage: python logs4.py mail.log")
+        sys.exit(1)
+
+    log_data = read_log_file(sys.argv[1])
 
     # Extract data for servers.csv
     servers_data = extract_servers_data(log_data)
@@ -53,8 +56,5 @@ def write_servers_csv(output_filename, servers_data):
 
         # Run main() if the script is called directly
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: logs4.py mail.log")
-        sys.exit(1)
     main()
 

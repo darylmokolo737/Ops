@@ -64,12 +64,14 @@ def extract_problem_macs_data(log_data):
 
     for line in log_lines:
         if 'DHCPACK' in line:
-
-            mac_address = re.search(r'from (\S+) via', line)
+            mac_address_match = re.search(r'from (\S+) via', line)
             if mac_address_match:
-                mac_address = mac_address_match.group(1)
+                mac_address = mac_address_match.group(1)  
                 mac_ack_counts[mac_address] += 1
-    
+
+    if not mac_ack_counts:
+                return []
+
     threshold = max(mac_ack_counts.values()) // 2
     problem_macs_data = [{'Macs': mac, 'ACKs': acks}
                          for mac, acks in mac_ack_counts.items() if acks > threshold]
