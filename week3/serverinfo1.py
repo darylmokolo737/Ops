@@ -23,17 +23,19 @@ def main():
 
     # Get and print OS type and version
     os_type = platform.system()
-    os_version = platform.version()
+    os_version = platform.release()
     print(f"OSType: {os_type}")
     print(f"OSVersion: {os_version}")
 
     # Get and print disk count
-    disk_count = len(psutil.disk_partitions())
-    print(f"Disks (Count): {disk_count}")
+    try:
+        disk_count = int(subprocess.check_output(["lsblk", "-d", "-n", "-o", "NAME"]).decode().strip().count('\n')) + 1
+        print(f"Disks (Count): {disk_count}")
+    except subprocess.CalledProcessError:
+        print("Error: Unable to retrieve disk information.")
 
     # Get and print IP and MAC address of eth0
     try:
-    
         ip_eth0 = subprocess.check_output(["/bin/ip", "-4", "addr", "show", "eth0"]).decode("utf-8").split("inet ")[1].split("/")[0]
         mac_eth0 = subprocess.check_output(["/bin/cat", "/sys/class/net/eth0/address"]).decode("utf-8").strip()
         print(f"ip of eth0: {ip_eth0}")

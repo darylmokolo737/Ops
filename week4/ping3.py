@@ -13,8 +13,14 @@ def main():
     input_arg = sys.argv[1]
     output_filename = sys.argv[2] if len(sys.argv) == 3 else None
 
-    with open(input_arg, 'r') as file:
-        lines = file.readlines()
+    if not isfile(input_arg):
+        results = [pingthis(input_arg)]
+        print_results(results)
+        if output_filename:
+            write_to_csv(results, output_filename)
+    else:
+        with open(input_arg, 'r') as file:
+            lines = file.readlines()
         
         results = []
 
@@ -22,10 +28,25 @@ def main():
             ipordns = line.strip()
             result = pingthis(ipordns)
             results.append(result)
-            print(f"{result[0]}, {result[1]}")
 
-        if output_filename:
-            write_to_csv(results, output_filename)        
+            print_results(results)
+            if output_filename:
+                write_to_csv(results, output_filename)        
+
+def isfile(path):
+    """Check if the given path is a file."""
+    try:
+        with open(path, 'r') as file:
+            return True
+    except FileNotFoundError:
+        return False
+
+
+def print_results(results):
+    """Print results to console."""
+    print("IP, TimeToPing (ms)")
+    for result in results:
+        print(f"{result[0]}, {result[1]}")
 
 
 def write_to_csv(results, output_filename):

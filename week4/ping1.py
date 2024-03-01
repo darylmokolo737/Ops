@@ -12,16 +12,23 @@ def main():
         sys.exit(1)
 
     filename = sys.argv[1]
+    # Print the header line before opening the file
+    print("IP, TimeToPing (ms)")
+
     with open(filename, 'r') as file:
         lines = file.readlines()
 
-    print("IP, TimeToPing (ms)")
+    # Iterate over each line in the file
+        for line in lines:
+            ipordns = line.strip()
 
-    for line in lines:
-        ipordns = line.strip()
-        result = pingthis(ipordns)
-        print(f"{result[0]}, {result[1]}")
+            try:
+                # Call the pingthis function and handle exceptions
+                result = pingthis(ipordns)
+                print(f"{result[0]}, {result[1]}")
+            except Exception as e:
+                print(f"{ipordns}, Error: {e}")
 
-        # Run main() if the script is called directly
+# Run main() if the script is called directly
 if __name__ == "__main__":
     main()

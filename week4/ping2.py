@@ -16,8 +16,12 @@ def main():
 
     if os.path.isfile(target):
         # If the argument is a file, read lines from the file
-        with open(target, 'r') as file:
-            lines = file.readlines()
+        try:
+            with open(target, 'r') as file:
+                lines = file.readlines()
+        except FileNotFoundError:
+            print(f"Error: File '{target}' not found.")
+            sys.exit(1)
 
         print("IP, TimeToPing (ms)")
 

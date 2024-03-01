@@ -3,7 +3,7 @@
 a = 11
 msg = "Hello World"  
 
-if a < 10:
+if a >= 10:
     print(msg)  
 else:
     print("Error")  
