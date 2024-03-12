@@ -1,0 +1,62 @@
+[
+    {
+        "COL 1": "name",
+        "COL 2": "macaddress",
+        "COL 3": "ip",
+        "COL 4": "cpucount",
+        "COL 5": "disks",
+        "COL 6": "ram",
+        "COL 7": "ostype",
+        "COL 8": "osversion"
+    },
+    {
+        "COL 1": "yoda",
+        "COL 2": "c8:f6:50:e7:93:ff",
+        "COL 3": "192.168.10.21",
+        "COL 4": "1",
+        "COL 5": "1",
+        "COL 6": "4",
+        "COL 7": "ubuntu",
+        "COL 8": "12.04"
+    },
+    {
+        "COL 1": "neytiri",
+        "COL 2": "30:85:a9:57:a9:1d",
+        "COL 3": "192.168.10.10",
+        "COL 4": "2",
+        "COL 5": "1",
+        "COL 6": "16",
+        "COL 7": "windows",
+        "COL 8": "2012"
+    },
+    {
+        "COL 1": "hal",
+        "COL 2": "2c:44:fd:02:02:3b",
+        "COL 3": "192.168.10.22",
+        "COL 4": "1",
+        "COL 5": "1",
+        "COL 6": "2",
+        "COL 7": "windows",
+        "COL 8": "7"
+    },
+    {
+        "COL 1": "thufir",
+        "COL 2": "5c:96:9d:90:10:b9",
+        "COL 3": "192.168.10.11",
+        "COL 4": "4",
+        "COL 5": "4",
+        "COL 6": "4",
+        "COL 7": "centos",
+        "COL 8": "6"
+    },
+    {
+        "COL 1": "leeloo",
+        "COL 2": "00:10:49:1c:25:7f",
+        "COL 3": "192.168.10.23",
+        "COL 4": "1",
+        "COL 5": "1",
+        "COL 6": "4",
+        "COL 7": "windows",
+        "COL 8": "7"
+    }
+]
