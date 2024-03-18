@@ -59,23 +59,22 @@ def write_logs_csv(output_filename, logs_data):
 
 def extract_problem_macs_data(log_data):
     """Extract data for ProblemMacs.csv."""
-    mac_ack_counts = defaultdict(int)
+    mac_ip_ack_counts = defaultdict(int)
     log_lines = log_data.split('\n')
 
     for line in log_lines:
         if 'DHCPACK' in line:
-            mac_address_match = re.search(r'from (\S+) via', line)
-            if mac_address_match:
-                mac_address = mac_address_match.group(1)  
-                mac_ack_counts[mac_address] += 1
+            mac_address_match = re.search(r'for (\S+) from', line)
+            ip_address_match = re.search(r'on (\S+) to', line)
+            if mac_address_match and ip_address_match:
+                mac_address = mac_address_match.group(1)
+                ip_address = ip_address_match.group(1)
+                mac_ip = f"{mac_address}-{ip_address}"
+                mac_ip_ack_counts[mac_ip] += 1
 
-    if not mac_ack_counts:
-                return []
-
-    threshold = max(mac_ack_counts.values()) // 2
-    problem_macs_data = [{'Macs': mac, 'ACKs': acks}
-                         for mac, acks in mac_ack_counts.items() if acks > threshold]
-    return problem_macs_data
+    logs_data = [{'Macs': mac_ip.split('-')[0], 'IPs': mac_ip.split('-')[1], 'ACKs': acks}
+                    for mac_ip, acks in mac_ip_ack_counts.items()]
+    return logs_data
 
 def write_problem_macs_csv(output_filename, problem_macs_data):
     """Write ProblemMacs.csv file."""

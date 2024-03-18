@@ -2,7 +2,6 @@
 ### Script to extract iPhone MAC addresses from dhcpd log file.
 ### DM-2052024
 import re
-import csv
 
 # this will set up initial variables and imports
 # < GLOBAL, INITIAL VARIABLES, AND IMPORTS (e.g., import sys) >
@@ -26,18 +25,13 @@ def read_log_file(filename):
 
 def extract_iphone_macs(log_data):
     """Extract iPhone MAC addresses from the log data."""
-    # Implement your regex or logic to extract iPhone MAC addresses
-    mac_addresses = re.findall(r'(?:[0-9a-fA-F]:?){12}', log_data)
-    iphone_macs = [mac.lower() for mac in mac_addresses if is_iphone(mac)]
+    # Regex pattern for iPhone MAC addresses
+    iphone_mac_pattern = re.compile(r'\b(?:[0-9A-Fa-f]{2}[:-]){5}(?:[0-9A-Fa-f]{2})\b')
+
+    # Find all matches in the log data
+    iphone_macs = iphone_mac_pattern.findall(log_data)
+
     return iphone_macs
-
-def is_iphone(mac_address):
-    """Check if a MAC address belongs to an iPhone."""
-    # Updated regular expression for iPhone MAC addresses
-    iphone_mac_pattern = re.compile(r'^(?:[0-9a-fA-F]{2}[:.-]?){5}(?:[0-9a-fA-F]{2})$')
-
-    return bool(iphone_mac_pattern.match(mac_address))
-
 
 def write_output_file(output_filename, iphone_macs, unique_count):
     """Write iPhone MAC addresses and count to an output file."""
