@@ -1,0 +1,46 @@
+DNS,IP,Services,Country,RegionName,City,Zipcode,ISP
+admin.google.com,172.253.122.100,,United States,California,Mountain View,94043,Google LLC
+admin.google.com,172.253.122.101,,United States,California,Mountain View,94043,Google LLC
+admin.google.com,172.253.122.102,,United States,California,Mountain View,94043,Google LLC
+admin.google.com,172.253.122.113,,United States,California,Mountain View,94043,Google LLC
+admin.google.com,172.253.122.138,,United States,California,Mountain View,94043,Google LLC
+admin.google.com,172.253.122.139,,United States,California,Mountain View,94043,Google LLC
+id.google.com,142.251.42.131,,United States,New York,New York,10002,Google LLC
+ads.google.com,142.251.167.100,,United States,Maryland,Rockville,20850,Google LLC
+ads.google.com,142.251.167.101,,United States,Maryland,Rockville,20850,Google LLC
+ads.google.com,142.251.167.102,,United States,Maryland,Rockville,20850,Google LLC
+ads.google.com,142.251.167.113,,United States,Maryland,Rockville,20850,Google LLC
+ads.google.com,142.251.167.138,,United States,Maryland,Rockville,20850,Google LLC
+ads.google.com,142.251.167.139,,United States,Maryland,Rockville,20850,Google LLC
+images.google.com,172.253.122.100,,United States,California,Mountain View,94043,Google LLC
+images.google.com,172.253.122.101,,United States,California,Mountain View,94043,Google LLC
+images.google.com,172.253.122.102,,United States,California,Mountain View,94043,Google LLC
+images.google.com,172.253.122.113,,United States,California,Mountain View,94043,Google LLC
+images.google.com,172.253.122.138,,United States,California,Mountain View,94043,Google LLC
+images.google.com,172.253.122.139,,United States,California,Mountain View,94043,Google LLC
+alerts.google.com,142.251.111.100,,United States,California,Mountain View,94043,Google LLC
+alerts.google.com,142.251.111.101,,United States,California,Mountain View,94043,Google LLC
+alerts.google.com,142.251.111.102,,United States,California,Mountain View,94043,Google LLC
+alerts.google.com,142.251.111.113,,United States,California,Mountain View,94043,Google LLC
+alerts.google.com,142.251.111.138,,United States,California,Mountain View,94043,Google LLC
+alerts.google.com,142.251.111.139,,United States,California,Mountain View,94043,Google LLC
+news.google.com,172.253.122.100,,United States,California,Mountain View,94043,Google LLC
+news.google.com,172.253.122.101,,United States,California,Mountain View,94043,Google LLC
+news.google.com,172.253.122.102,,United States,California,Mountain View,94043,Google LLC
+news.google.com,172.253.122.113,,United States,California,Mountain View,94043,Google LLC
+news.google.com,172.253.122.138,,United States,California,Mountain View,94043,Google LLC
+news.google.com,172.253.122.139,,United States,California,Mountain View,94043,Google LLC
+ap.google.com,142.251.163.103,,United States,Maryland,Rockville,20850,Google LLC
+ap.google.com,142.251.163.104,,United States,Maryland,Rockville,20850,Google LLC
+ap.google.com,142.251.163.105,,United States,Maryland,Rockville,20850,Google LLC
+ap.google.com,142.251.163.106,,United States,Maryland,Rockville,20850,Google LLC
+ap.google.com,142.251.163.147,,United States,Maryland,Rockville,20850,Google LLC
+ap.google.com,142.251.163.99,,United States,Maryland,Rockville,20850,Google LLC
+ns.google.com,216.239.32.10,,United States,California,Mountain View,94043,Google LLC
+dns.google.com,8.8.4.4,,United States,Virginia,Ashburn,20149,Google LLC
+dns.google.com,8.8.8.8,,United States,Virginia,Ashburn,20149,Google LLC
+upload.google.com,142.251.163.116,,United States,Maryland,Rockville,20850,Google LLC
+upload.google.com,142.251.163.117,,United States,Maryland,Rockville,20850,Google LLC
+ns1.google.com,216.239.32.10,,United States,California,Mountain View,94043,Google LLC
+apps.google.com,142.251.111.100,,United States,California,Mountain View,94043,Google LLC
+apps.google.com,142.251.111.101,,United States,California,Mountain View,94043,Google LLC
