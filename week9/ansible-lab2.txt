@@ -1,0 +1,18 @@
+C:\Users\Administrator>ping <linux1 server public IP> >> ansible-lab.txt
+>> was unexpected at this time.
+
+C:\Users\Administrator>
+C:\Users\Administrator>ping 44.222.13.140
+
+Pinging 44.222.13.140 with 32 bytes of data:
+Reply from 44.222.13.140: bytes=32 time=1ms TTL=63
+Reply from 44.222.13.140: bytes=32 time=2ms TTL=63
+Reply from 44.222.13.140: bytes=32 time=1ms TTL=63
+Reply from 44.222.13.140: bytes=32 time=1ms TTL=63
+
+Ping statistics for 44.222.13.140:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 1ms, Maximum = 2ms, Average = 1ms
+
+C:\Users\Administrator>

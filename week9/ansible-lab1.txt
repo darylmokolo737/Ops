@@ -1,0 +1,22 @@
+Starting Nmap 7.80 ( https://nmap.org ) at 2024-03-17 07:49 PDT
+Nmap scan report for ec2-3-92-156-206.compute-1.amazonaws.com (3.92.156.206)
+Host is up (0.0017s latency).
+Not shown: 999 filtered ports
+PORT     STATE SERVICE       VERSION
+3389/tcp open  ms-wbt-server Microsoft Terminal Services
+| rdp-ntlm-info: 
+|   Target_Name: EC2AMAZ-N18MKQO
+|   NetBIOS_Domain_Name: EC2AMAZ-N18MKQO
+|   NetBIOS_Computer_Name: EC2AMAZ-N18MKQO
+|   DNS_Domain_Name: EC2AMAZ-N18MKQO
+|   DNS_Computer_Name: EC2AMAZ-N18MKQO
+|   Product_Version: 10.0.20348
+|_  System_Time: 2024-03-17T14:49:25+00:00
+| ssl-cert: Subject: commonName=EC2AMAZ-N18MKQO
+| Not valid before: 2024-01-08T02:13:33
+|_Not valid after:  2024-07-09T02:13:33
+|_ssl-date: 2024-03-17T14:49:25+00:00; 0s from scanner time.
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 13.06 seconds

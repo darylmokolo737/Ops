@@ -1,0 +1,10 @@
+Starting Nmap 7.80 ( https://nmap.org ) at 2024-03-17 07:42 PDT
+Nmap scan report for ec2-44-194-66-247.compute-1.amazonaws.com (44.194.66.247)
+Host is up (0.0072s latency).
+Not shown: 998 closed ports
+PORT   STATE    SERVICE VERSION
+22/tcp open     ssh     OpenSSH 8.7 (protocol 2.0)
+25/tcp filtered smtp
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 1.89 seconds
