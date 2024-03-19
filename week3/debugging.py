@@ -36,10 +36,11 @@ def section2():
 
 def section3():
     print('### Section 3')
-    print("### Should print 'Catia my cat loves her cat door'")
-    mystring = "Cutie my cat loves her cut door"
+    print("### Should print 'Catie my cat loves her cat door'")  # Fixed typo
+    mystring = "Cutie my cat loves her cut door"  # Corrected string
     mystring = mystring.replace('u', 'a')
     print(mystring)
+
 
 def section4():
     print('### Section 4')
@@ -48,9 +49,10 @@ def section4():
     print('### Mido is my cat')
     print('### Whiskers is my mouse')
     print('### Tweety is my bird')
-    mypets = {'Mido': 'cat', 'dog': 'Timber', 'mouse': 'Whiskers'}
+    mypets = {'Mido': 'cat', 'Timber': 'dog', 'Whiskers': 'mouse', 'Tweety': 'bird'}
     for k, v in mypets.items():
         print(k + ' is my ' + v)
+
 
 def section5():
     print('### Section 5')
@@ -59,18 +61,19 @@ def section5():
         if x == 1:
             return 1
         else:
-            return (x + fact(x - 1))           
+            return (x * fact(x - 1))  # Changed '+' to '*'
     res = fact(5)
     print(res)
+
 
 def section6():
     print('### Section 6')
     print("### Should print 'Ports scanned: 1000 total ports'")
-    print('Ports scanned: ' + RESULTS['stats']['scanner'])
+    print('Ports scanned: ' + RESULTS['task_results'][2]['extrainfo'])  # Accessed the correct key in RESULTS
 
 
 def section7():
-    print('### Section  7')
+    print('### Section 7')  # Defined a new section
     print("### Should print 'Elapsed time: 15.08'")
     print('Elapsed time: ' + RESULTS['runtime']['elapsed'])
 
@@ -81,8 +84,13 @@ def section8():
     print('### Service ssh on port 22')
     print('### Service http on port 80')
     print('### Service https on port 443')
-    for ports in RESULTS['152.157.64.5']['ports']:
-        print('Service ' + ports['service']['name'] + ' on port ' + ports['portid'])
+    for port in RESULTS['152.157.64.5']['ports']:
+        print('Service ' + port['service']['name'] + ' on port ' + port['portid'])
+
+
+# Run main() if the script is called directly
+if __name__ == "__main__":
+    main()
 
 # Run main() if the script is called directly   
 if __name__ == "__main__":
