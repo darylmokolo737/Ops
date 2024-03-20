@@ -6,9 +6,16 @@ import platform
 import psutil
 import subprocess
 
-# Main routine that will be called everytime the script is run
+#!/usr/bin/python3
+### This script returns ll help me information about the machine it is running on.
+### DM-1192024
+
+import platform
+import psutil
+import subprocess
+
 def main():
-    """This function retrieves and prints information the server."""
+    """This function retrieves and prints information about the server."""
     # Get and print hostname
     hostname = platform.node()
     print(f"Hostname: {hostname}")
@@ -27,14 +34,14 @@ def main():
     print(f"OSType: {os_type}")
     print(f"OSVersion: {os_version}")
 
-    # Get and print disk count
+    # Get and print disk count using the lsblk command
     try:
-        disk_count = int(subprocess.check_output(["lsblk", "-d", "-n", "-o", "NAME"]).decode().strip().count('\n')) + 1
+        disk_count = int(subprocess.check_output(["lsblk", "-d", "-n", "-o", "NAME"]).decode().strip().count('\n')) 
         print(f"Disks (Count): {disk_count}")
     except subprocess.CalledProcessError:
         print("Error: Unable to retrieve disk information.")
 
-    # Get and print IP and MAC address of eth0
+    # This will Get and print IP and MAC address of eth0
     try:
         ip_eth0 = subprocess.check_output(["/bin/ip", "-4", "addr", "show", "eth0"]).decode("utf-8").split("inet ")[1].split("/")[0]
         mac_eth0 = subprocess.check_output(["/bin/cat", "/sys/class/net/eth0/address"]).decode("utf-8").strip()
@@ -43,7 +50,7 @@ def main():
     except subprocess.CalledProcessError:
         print("Error: Unable to retrieve network information.")
 
-    # Run main() if the script is called directly
+
 if __name__ == "__main__":
     main()
 
