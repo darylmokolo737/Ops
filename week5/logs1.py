@@ -2,18 +2,18 @@
 ### Script to extract iPhone MAC addresses from dhcpd log file.
 ### DM-2052024
 import re
+import sys
 
-# this will set up initial variables and imports
-# < GLOBAL, INITIAL VARIABLES, AND IMPORTS (e.g., import sys) >
-LOG_FILE = "dhcpdsmall.log"
-OUTPUT_FILE = "logs1.txt"
+# # Global variables
+LOG_FILE = sys.argv[1]
+OUTPUT_FILE = "logs1.csv"
 
-# Main routine that is called when the script is run
+
 def main():
     """Main function to extract iPhone MAC addresses and count."""
     log_data = read_log_file(LOG_FILE)
     iphone_macs = extract_iphone_macs(log_data)
-    unique_count = len(set(iphone_macs))
+    unique_count = len(iphone_macs)
 
     write_output_file(OUTPUT_FILE, iphone_macs, unique_count)
 
@@ -24,23 +24,22 @@ def read_log_file(filename):
     return log_data
 
 def extract_iphone_macs(log_data):
-    """Extract iPhone MAC addresses from the log data."""
-    # Regex pattern for iPhone MAC addresses
-    iphone_mac_pattern = re.compile(r'\b(?:[0-9A-Fa-f]{2}[:-]){5}(?:[0-9A-Fa-f]{2})\b')
+    """Extract unique iPhone MAC addresses from the log data."""
+    # Regex pattern for iPhone MAC addresses (complete MAC address)
+    iphone_mac_pattern = re.compile(r'\b([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b')
 
-    # Find all matches in the log data
+    # This help me find all matches in the log data
     iphone_macs = iphone_mac_pattern.findall(log_data)
 
-    return iphone_macs
+    return list(set(iphone_macs))
 
 def write_output_file(output_filename, iphone_macs, unique_count):
-    """Write iPhone MAC addresses and count to an output file."""
+    """This will Write unique iPhone MAC addresses and count to an output file."""
     with open(output_filename, 'w') as file:
         for mac in iphone_macs:
             file.write(f"{mac}\n")
         file.write(f"Count = {unique_count}\n")
 
-    # Run main() if the script is called directly
+# Run main() if the script is called directly
 if __name__ == "__main__":
     main()
-
