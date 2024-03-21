@@ -1,28 +1,21 @@
 #!/usr/bin/python3
 ### Script to analyze DHCP log file for potential DOS attacks.
 ### DM-1102024
+
 import re
-import csv
 import sys
 from collections import defaultdict
 
-# Set up initial variables and imports
-LOG_FILE = "dhcpdsmall.log"
+# Global variables
+LOG_FILE = sys.argv[1]
 OUTPUT_FILE = "logs2.csv"
-PROBLEM_MACS_FILE = "ProblemMacs.csv"
 
-# Main routine that is called when the script is run
+# Main routine
 def main():
-    """Main function to analyze DHCP log file."""
+    """Main function to extract MAC addresses, IPs, and ACKs."""
     log_data = read_log_file(LOG_FILE)
-
-    # Extract data for logs2.csv
-    logs_data = extract_logs_data(log_data)
-    write_logs_csv(OUTPUT_FILE, logs_data)
-
-    # Extract data for ProblemMacs.csv
-    problem_macs_data = extract_problem_macs_data(log_data)
-    write_problem_macs_csv(PROBLEM_MACS_FILE, problem_macs_data)
+    macs_ips_acks = extract_macs_ips_acks(log_data)
+    write_output_file(OUTPUT_FILE, macs_ips_acks)
 
 def read_log_file(filename):
     """Read the contents of the DHCP log file."""
@@ -30,59 +23,30 @@ def read_log_file(filename):
         log_data = file.read()
     return log_data
 
-def extract_logs_data(log_data):
-    """Extract data for logs2.csv."""
-    mac_ip_ack_counts = defaultdict(int)
-    log_lines = log_data.split('\n')
+def extract_macs_ips_acks(log_data):
+    """Extract MAC addresses, IPs, and ACKs from the log data."""
+    # Regex pattern for MAC addresses, IPs, and ACKs
+    pattern = re.compile(r'DHCPACK on (\S+) to (\S+)')
 
-    for line in log_lines:
-        if 'DHCPACK' in line:
-            mac_address_match = re.search(r'from (\S+) via', line)
-            ip_address_match = re.search(r'DHCPACK on (\S+) to', line)
-            if mac_address_match and ip_address_match:
-                mac_address = mac_address_match.group(1)
-                ip_address = ip_address_match.group(1)
-                mac_ip = f"{mac_address}-{ip_address}"
-                mac_ip_ack_counts[mac_ip] += 1
+    # Initialize dictionary to store MACs, IPs, and ACKs
+    macs_ips_acks = defaultdict(int)
 
-    logs_data = [{'Macs': mac_ip.split('-')[0], 'IPs': mac_ip.split('-')[1], 'ACKs': acks}
-                    for mac_ip, acks in mac_ip_ack_counts.items()]
-    return logs_data
+    # Find all matches in the log data
+    matches = pattern.findall(log_data)
+    for match in matches:
+        mac_address, ip_address = match
+        key = f"{mac_address}-{ip_address}"
+        macs_ips_acks[key] += 1
 
-def write_logs_csv(output_filename, logs_data):
-    """Write logs2.csv file."""
-    with open(output_filename, 'w', newline='') as csvfile:
-        fieldnames = ['Macs', 'IPs', 'ACKs']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(logs_data)
+    return macs_ips_acks
 
-def extract_problem_macs_data(log_data):
-    """Extract data for ProblemMacs.csv."""
-    mac_ip_ack_counts = defaultdict(int)
-    log_lines = log_data.split('\n')
-
-    for line in log_lines:
-        if 'DHCPACK' in line:
-            mac_address_match = re.search(r'for (\S+) from', line)
-            ip_address_match = re.search(r'on (\S+) to', line)
-            if mac_address_match and ip_address_match:
-                mac_address = mac_address_match.group(1)
-                ip_address = ip_address_match.group(1)
-                mac_ip = f"{mac_address}-{ip_address}"
-                mac_ip_ack_counts[mac_ip] += 1
-
-    logs_data = [{'Macs': mac_ip.split('-')[0], 'IPs': mac_ip.split('-')[1], 'ACKs': acks}
-                    for mac_ip, acks in mac_ip_ack_counts.items()]
-    return logs_data
-
-def write_problem_macs_csv(output_filename, problem_macs_data):
-    """Write ProblemMacs.csv file."""
-    with open(output_filename, 'w', newline='') as csvfile:
-        fieldnames = ['Macs', 'ACKs']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(problem_macs_data)
+def write_output_file(output_filename, macs_ips_acks):
+    """Write MAC addresses, IPs, and ACKs to an output file."""
+    with open(output_filename, 'w') as file:
+        file.write("Macs, IPs, ACKs\n")
+        for key, acks in macs_ips_acks.items():
+            mac_address, ip_address = key.split('-')
+            file.write(f"{mac_address}, {ip_address}, {acks}\n")
 
 # Run main() if the script is called directly
 if __name__ == "__main__":

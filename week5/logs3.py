@@ -5,7 +5,7 @@ import requests
 import re
 import csv
 import sys
-
+import time
 # Set up initial variables and imports
 IP_FILE = sys.argv[1]
 LOG_FILE = sys.argv[2]
@@ -50,14 +50,19 @@ def extract_mac_address(ip):
         return "Not Found"
 
 def query_mac_vendor(mac_address):
-    """Query the Mac Vendors API to obtain the vendor information for the given MAC address."""
+    """This Query will query the Mac Vendors API to obtain the vendor information for the given MAC address."""
     if mac_address == "Not Found":
         return "Unknown"
     else:
         response = requests.get(API_URL + mac_address)
         if response.status_code == 200:
             return response.text
+        elif response.status_code == 429:  # Too Many Requests, retry after a delay
+            print(f"Rate limit exceeded for MAC address {mac_address}. Retrying in 5 seconds...")
+            time.sleep(5)  # Wait for 5 seconds before retrying
+            return query_mac_vendor(mac_address)  # Retry the request
         else:
+            print(f"Error fetching data for MAC address {mac_address}: {response.text}")
             return "Error"
 
 def write_csv_results(output_filename, results):
@@ -74,10 +79,9 @@ def write_ips_to_file(output_filename, ips):
         for ip in ips:
             file.write(ip + '\n')
 
-    # Run main() if the script is called directly
+# Run main() if the script is called directly
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: logs3.py <filename of IPs> <dhcpd log file>")
         sys.exit(1)
     main()
-

@@ -35,8 +35,7 @@ def extract_servers_data(log_data):
 
     for line in log_lines:
         # Use regex to extract server names and IPs
-        # Adjust the regex pattern according to your mail log format
-        match = re.search(r'from (\S+) \(.*?\[([0-9.]+)\]\)', line)
+        match = re.search(r'connect from (\S+)\[([0-9.]+)\]', line)
         if match:
             server_name = match.group(1)
             server_ip = match.group(2)
@@ -54,7 +53,6 @@ def write_servers_csv(output_filename, servers_data):
         writer.writeheader()
         writer.writerows(servers_data)
 
-        # Run main() if the script is called directly
+# Run main() if the script is called directly
 if __name__ == "__main__":
     main()
-
