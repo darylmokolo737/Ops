@@ -77,15 +77,16 @@ def section7():
     print("### Should print 'Elapsed time: 15.08'")
     print('Elapsed time: ' + RESULTS['runtime']['elapsed'])
 
-
 def section8():
     print('### Section 8')
     print("### Should print the following")
-    print('### Service ssh on port 22')
-    print('### Service http on port 80')
-    print('### Service https on port 443')
-    for port in RESULTS['152.157.64.5']['ports']:
-        print('Service ' + port['service']['name'] + ' on port ' + port['portid'])
+    print('###   Service ssh on port 22')
+    print('###   Service http on port 80')
+    print('###   Service https on port 443')
+    for ports in RESULTS['152.157.64.5']['ports']:
+        #print('Service ' + ports['protocol'] + ' on port ' + ports['state'])
+        if ports['state'] == 'open':
+            print('Service ' + ports['service']['name'] + ' on port ' + ports['portid'])
 
 
 # Run main() if the script is called directly
