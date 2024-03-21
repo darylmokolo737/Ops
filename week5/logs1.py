@@ -1,45 +1,34 @@
 #!/usr/bin/python3
 ### Script to extract iPhone MAC addresses from dhcpd log file.
 ### DM-2052024
-import re
+
+# Set up initial variables and imports
 import sys
+import re
+iphones = {}
 
-# # Global variables
-LOG_FILE = sys.argv[1]
-OUTPUT_FILE = "logs1.csv"
-
-
+# Main routine that is called when script is run
 def main():
-    """Main function to extract iPhone MAC addresses and count."""
-    log_data = read_log_file(LOG_FILE)
-    iphone_macs = extract_iphone_macs(log_data)
-    unique_count = len(iphone_macs)
+  """Loops over a file and counts unique iPhones"""
+  if len(sys.argv) == 2:
+    with open(sys.argv[1],'r',newline='') as fin:
+      for line in fin:
+        line = line.rstrip()
+        m = re.search(".*DHCPACK.*to (.*) .*iPhone",line)
+        if m:
+          mac = m.group(1)
+          iphones[mac] = 1
+    for k,v in iphones.items():
+      print(k)
+    print('Count = '+str(len(iphones)))
+  else:
+    usage()
 
-    write_output_file(OUTPUT_FILE, iphone_macs, unique_count)
+def usage():
+  """How to use this script"""
+  print('Usage: logs1.py filename')
 
-def read_log_file(filename):
-    """Read the contents of the DHCP log file."""
-    with open(filename, 'r') as file:
-        log_data = file.read()
-    return log_data
-
-def extract_iphone_macs(log_data):
-    """Extract unique iPhone MAC addresses from the log data."""
-    # Regex pattern for iPhone MAC addresses (complete MAC address)
-    iphone_mac_pattern = re.compile(r'\b([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}\b')
-
-    # This help me find all matches in the log data
-    iphone_macs = iphone_mac_pattern.findall(log_data)
-
-    return list(set(iphone_macs))
-
-def write_output_file(output_filename, iphone_macs, unique_count):
-    """This will Write unique iPhone MAC addresses and count to an output file."""
-    with open(output_filename, 'w') as file:
-        for mac in iphone_macs:
-            file.write(f"{mac}\n")
-        file.write(f"Count = {unique_count}\n")
-
-# Run main() if the script is called directly
+# Run main() if script called directly, else use as a library to be imported
 if __name__ == "__main__":
-    main()
+        main()
+

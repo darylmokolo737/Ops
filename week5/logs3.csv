@@ -1,7 +1,7 @@
-IP,Mac Address,Vendor
+IP,Mac address,Vendor
 ,2c:44:fd:02:02:3b,Hewlett Packard
-10.172.219.117,Not Found,Unknown
-10.192.125.251,Not Found,Unknown
-10.172.219.26,Not Found,Unknown
-10.191.155.13,Not Found,Unknown
+10.172.219.117,84:8e:0c:1d:58:60,"Apple, Inc."
+10.192.125.251,6c:f3:7f:ca:30:92,"Aruba, a Hewlett Packard Enterprise Company"
+10.172.219.26,00:19:d2:83:b1:36,Intel Corporate
+10.191.155.13,10:68:3f:4a:47:c5,LG Electronics (Mobile Communications)
 ,2c:44:fd:02:02:3b,Hewlett Packard

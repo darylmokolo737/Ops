@@ -2,53 +2,58 @@
 ### Script to analyze DHCP log file for potential DOS attacks.
 ### DM-1102024
 
-import re
+# Set up initial variables and imports
 import sys
-from collections import defaultdict
+import re
+import csv
+mac_ip = {}
 
-# Global variables
-LOG_FILE = sys.argv[1]
-OUTPUT_FILE = "logs2.csv"
-
-# Main routine
+# Main routine that is called when script is run
 def main():
-    """Main function to extract MAC addresses, IPs, and ACKs."""
-    log_data = read_log_file(LOG_FILE)
-    macs_ips_acks = extract_macs_ips_acks(log_data)
-    write_output_file(OUTPUT_FILE, macs_ips_acks)
+  """Loops over a file and counts acks on unique ip-mac combinations"""
+  if len(sys.argv) == 2:
+    with open(sys.argv[1],'r',newline='') as fin:
+      for line in fin:
+        line = line.rstrip()
+        m = re.search(".*DHCPACK (?:on (.*) to ((?:..\:){5}..)|\
+                      to (.*) \((.*) via)",line)
+        if m:
+          ip = m.group(1)
+          mac = m.group(2)
+          macip = mac+'-'+ip
+          if macip in mac_ip:
+            mac_ip[macip] = mac_ip[macip] + 1
+          else:
+            mac_ip[macip] = 1
+    # sort the mac_ip dict to make it easier to see the problems
+    mac_ip_sorted = sorted(mac_ip.items(), key=lambda x:x[1])
+    with open('logs2.csv','w',newline='') as fout:
+      csvout = csv.writer(fout)
+      csvout.writerow(['Mac address','IP address','Total number of acks'])
+      for macip,count in mac_ip_sorted:
+        (mac,ip) = macip.split('-')
+        csvout.writerow([mac,ip,count])
+    # write out the problemmac.csv file
+    with open('ProblemMacs.csv','w',newline='') as fout:
+      csvout = csv.writer(fout)
+      csvout.writerow(['Mac address','IP address','Total number of acks'])
+      with open('logs2.csv','r',newline='') as fin:
+        csvin = csv.reader(fin)
+        for row in csvin:
+          if row[0] == 'Mac address':
+            continue
+          elif int(row[2]) > 35:
+            csvout.writerow(row)
 
-def read_log_file(filename):
-    """Read the contents of the DHCP log file."""
-    with open(filename, 'r') as file:
-        log_data = file.read()
-    return log_data
+  else:
+    usage()
 
-def extract_macs_ips_acks(log_data):
-    """Extract MAC addresses, IPs, and ACKs from the log data."""
-    # Regex pattern for MAC addresses, IPs, and ACKs
-    pattern = re.compile(r'DHCPACK on (\S+) to (\S+)')
 
-    # Initialize dictionary to store MACs, IPs, and ACKs
-    macs_ips_acks = defaultdict(int)
+# Subroutines
+def usage():
+  """How to use this script"""
+  print('Usage: logs2.py filename')
 
-    # Find all matches in the log data
-    matches = pattern.findall(log_data)
-    for match in matches:
-        mac_address, ip_address = match
-        key = f"{mac_address}-{ip_address}"
-        macs_ips_acks[key] += 1
-
-    return macs_ips_acks
-
-def write_output_file(output_filename, macs_ips_acks):
-    """Write MAC addresses, IPs, and ACKs to an output file."""
-    with open(output_filename, 'w') as file:
-        file.write("Macs, IPs, ACKs\n")
-        for key, acks in macs_ips_acks.items():
-            mac_address, ip_address = key.split('-')
-            file.write(f"{mac_address}, {ip_address}, {acks}\n")
-
-# Run main() if the script is called directly
+# Run main() if script called directly, else use as a library to be imported
 if __name__ == "__main__":
-    main()
-
+        main()
