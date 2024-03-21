@@ -1,56 +1,73 @@
 #!/usr/bin/python3
-### This script returns ll help me information about the machine it is running on.
-### DM-1192024
+# Get information on the server and print to the screen
+# Daryl -2024204: initial version
 
-import platform
+# Set up initial variables and imports
+import socket
 import psutil
+import distro
 import subprocess
+import re
 
-#!/usr/bin/python3
-### This script returns ll help me information about the machine it is running on.
-### DM-1192024
-
-import platform
-import psutil
-import subprocess
-
+# Main routine that is called when script is run
 def main():
-    """This function retrieves and prints information about the server."""
-    # Get and print hostname
-    hostname = platform.node()
-    print(f"Hostname: {hostname}")
+  """Print out system information"""
+  print('HostName = '+get_hostname())
+  print('CPU (count): '+get_cpu_count())
+  print('RAM (GB): '+get_ram())
+  print('OSType: '+get_ostype())
+  print('OSVersion: '+get_osversion())
+  print('Disks (Count): '+get_disk_count())
+  ip_mac = get_eth0_ip_mac()
+  print('ip of eth0: '+ip_mac[0])
+  print('mac of eth0: '+ip_mac[1])
 
-    # Get and print CPU count
-    cpu_count = psutil.cpu_count(logical=False)
-    print(f"CPU (count): {cpu_count}")
+def get_hostname():
+  """Returns the hostname"""
+  return(socket.gethostname())
 
-    # Get and print RAM in GB
-    ram_gb = round(psutil.virtual_memory().total / (1024 ** 3), 2)
-    print(f"RAM (GB): {ram_gb}")
+def get_cpu_count():
+  """Returns the cpu count"""
+  return(str(psutil.cpu_count()))
 
-    # Get and print OS type and version
-    os_type = platform.system()
-    os_version = platform.release()
-    print(f"OSType: {os_type}")
-    print(f"OSVersion: {os_version}")
+def get_ram():
+  """Returns the ram as GB"""
+  ram = round((psutil.virtual_memory().total)/(1024*1024*1024),0)
+  return(str(ram))
 
-    # Get and print disk count using the lsblk command
-    try:
-        disk_count = int(subprocess.check_output(["lsblk", "-d", "-n", "-o", "NAME"]).decode().strip().count('\n')) 
-        print(f"Disks (Count): {disk_count}")
-    except subprocess.CalledProcessError:
-        print("Error: Unable to retrieve disk information.")
+def get_ostype():
+  """Returns the OS Type"""
+  return(distro.name())
 
-    # This will Get and print IP and MAC address of eth0
-    try:
-        ip_eth0 = subprocess.check_output(["/bin/ip", "-4", "addr", "show", "eth0"]).decode("utf-8").split("inet ")[1].split("/")[0]
-        mac_eth0 = subprocess.check_output(["/bin/cat", "/sys/class/net/eth0/address"]).decode("utf-8").strip()
-        print(f"ip of eth0: {ip_eth0}")
-        print(f"mac of eth0: {mac_eth0}")
-    except subprocess.CalledProcessError:
-        print("Error: Unable to retrieve network information.")
+def get_osversion():
+  """Returns the OS Version"""
+  return(distro.version())
 
+def get_disk_count():
+  """Returns the number of disks"""
+  proc = subprocess.run("lsblk | grep disk | wc -l", shell=True, \
+          universal_newlines=True, capture_output=True, text=True)
+  if proc.returncode == 0:
+    res = proc.stdout.rstrip()
+    return(res)
+  else:
+    exit('Error in subprocess.run to get disk count')
 
+def get_eth0_ip_mac():
+  """Returns of IP of eth0"""
+  proc = subprocess.run("ip addr show eth0", shell=True, universal_newlines= \
+          True, capture_output=True, text=True)
+  if proc.returncode == 0:
+    res = proc.stdout
+    m = re.search('ether (.*) brd.*inet (.*)\/.. metric',res,re.DOTALL)
+    if m:
+      return([m.group(2),m.group(1)])
+    else:
+      return('No pattern match on Eth0')
+  else: 
+    exit('Error in subprocess.run to get IP')
+
+# Run main() if script called directly, else use as a library to be imported
 if __name__ == "__main__":
-    main()
+        main()
 
