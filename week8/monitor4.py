@@ -2,150 +2,262 @@
 ### Script to monitor local machine health status including file hashes, ping checks, CPU load, disk usage, and memory usage.
 ### DM-1102024
 
-import os
-import csv
-import subprocess
-import psutil
-import platform
+# Set up initial variables and imports
+import pymysql
+import sys
+import os.path
 import hashlib
 from datetime import datetime
 import time
-import sys
+import csv
+import pinglib
+import psutil
 
-# Function to calculate the MD5 hash of a file
-def calculate_file_hash(filepath):
-    try:
-        with open(filepath, "rb") as f:
-            file_hash = hashlib.md5()
-            while chunk := f.read(8192):
-                file_hash.update(chunk)
-            return file_hash.hexdigest()
-    except FileNotFoundError:
-        return None
+# database connection info
+host = 'localhost'
+user = 'cmdb'
+passwd = 'Berouz1234!'
+database = 'cmdb'
+table = 'files'
 
-def add_server(server):
-    # Add code to add server to the database
-    pass  # Placeholder for the actual implementation
-
-
-# Function to perform disk usage check
-def check_disk_usage():
-    disk_usage = psutil.disk_usage('/')
-    return disk_usage.percent
-
-# Function to perform CPU load check
-def check_cpu_load():
-    cpu_load = os.getloadavg()[0]  # 1-minute CPU load
-    return cpu_load
-
-# Function to perform free memory check
-def check_free_memory():
-    mem = psutil.virtual_memory()
-    free_mem_percent = (mem.available / mem.total) * 100
-    return free_mem_percent
-
-# Function to perform ping check
-def ping_check(server):
-    try:
-        output = subprocess.check_output(["ping", "-c", "1", server]).decode()
-        if "1 received" in output:
-            return True
-        else:
-            return False
-    except subprocess.CalledProcessError:
-        return False
-
-# Function to append data to CSV file
-def append_to_csv(filename, data):
-    with open(filename, 'a', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(data)
-
-# Main function
+# Main routine that is called when script is run
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: monitor4.py <cmd> <options>")
-        return
+  """Get hash of file on cli and add to database"""
+  # Connect to database
+  db = pymysql.connect(host=host,user=user,password=passwd,database=database)
+  cursor = db.cursor()
 
-    command = sys.argv[1]
-    options = sys.argv[2]
+  # Get the file path
+  if len(sys.argv) != 3:
+    usage()
+  
+  # Handle the updatehash command
+  if sys.argv[1] == 'updatehash':
+    myfile = sys.argv[2]
 
-    if command == 'run':
-        interval = int(options)
-        while True:
-            check_date = datetime.utcnow().isoformat()
-            
-            # File hash check
-            # Perform file hash check for each file in the database
-            # Assuming filepath is stored in a list named 'filepaths'
-            for filepath in filepaths:
-                old_hash = get_old_hash(filepath)  # Get old hash from database
-                current_hash = calculate_file_hash(filepath)
-                if old_hash == current_hash:
-                    status = "OK"
-                else:
-                    status = "FAIL"
-                message = f"FILE={filepath}, OLD_HASH={old_hash}, CURRENT_HASH={current_hash}"
-                append_to_csv("monitor4.csv", [check_date, "filehash", status, message])
+    # Create a zulu timestamp
+    timestamp = get_zulu_timestamp()
+  
+    # Create file hash
+    if not os.path.exists(myfile):
+      print(myfile + ' does not exist')
+      usage()
+  
+    filehash = get_hash(myfile)
+  
+    # Verify the path is not already in the database.  If it is prompt if user
+    # to see if they want to replace the has
+    if path_exists(cursor, myfile ):
+      ans = input('File path exists, do you want to overwrite (Y/N): ')
+      if not ans == 'Y':
+        exit('Exiting without any changes')
+      else:
+        delete_path(db,cursor,timestamp,myfile)
+  
+    # Now add the path
+    add_path(db, cursor, timestamp,myfile,filehash)
+    db.close()
 
-            # Ping check
-            # Assuming server IPs are stored in a list named 'servers'
-            for server in servers:
-                if ping_check(server):
-                    status = "OK"
-                else:
-                    status = "FAIL"
-                message = f"SERVER={server}, TIME(MS)={ping_time(server)}"
-                append_to_csv("monitor4.csv", [check_date, "ping", status, message])
+  # Handle the run command
+  elif sys.argv[1] == 'run':
+    mytime = int(sys.argv[2])
+    with open('monitorchecks.csv','a',newline='') as fout:
+      # Write out the header row
+      csvout = csv.writer(fout)
+      csvout.writerow(['check date','check type','status','message'])
 
-            # Host CPU load check
-            cpu_load = check_cpu_load()
-            if cpu_load <= 2.00:
-                cpu_status = "OK"
-            else:
-                cpu_status = "FAIL"
-            cpu_message = f"CPU_LOAD={cpu_load}"
-            append_to_csv("monitor4.csv", [check_date, "host-cpu", cpu_status, cpu_message])
+      # Infinite while loop
+      while True:
+        # Check the file hashes from the database
+        check_file_hashes(db, cursor, csvout)
 
-            # Host disk usage check
-            disk_usage = check_disk_usage()
-            if disk_usage <= 85:
-                disk_status = "OK"
-            else:
-                disk_status = "FAIL"
-            disk_message = f"DISK_USED={disk_usage}%"
-            append_to_csv("monitor4.csv", [check_date, "host-disk", disk_status, disk_message])
+        # Check the servers from the database
+        check_servers(db, cursor, csvout)
 
-            # Host memory check
-            free_memory = check_free_memory()
-            if free_memory >= 25:
-                mem_status = "OK"
-            else:
-                mem_status = "FAIL"
-            mem_message = f"FREE_MEM={free_memory}%"
-            append_to_csv("monitor4.csv", [check_date, "host-mem", mem_status, mem_message])
+        # Localhost checks
+        check_localhost(csvout)
 
-            time.sleep(interval)
+        # Force the buffer to write to the file
+        fout.flush()
 
-    elif command == 'updatehash':
-        filepath = options
-        current_hash = calculate_file_hash(filepath)
-        # Update hash in the database
-        update_hash(filepath, current_hash)
+        # Wait mytime seconds and then do it again
+        time.sleep(mytime)  
 
-    elif command == 'addserver':
-        server = options
-        # Add server to the database
-        add_server(server)
+  # Handle addserver command
+  elif sys.argv[1] == 'addserver':
+    myserver = sys.argv[2]
+    add_server(db, cursor, myserver)
 
-    elif command == 'deleteserver':
-        server = options
-        # Delete server from the database
-        delete_server(server)
+  # Handle deleteserver command
+  elif sys.argv[1] == 'deleteserver':
+    myserver = sys.argv[2]
+    delete_server(db, cursor, myserver)
 
+  # Handle all other cases
+  else:
+    usage()
+
+# Subroutines
+def path_exists(dbcursor, filepath):
+  """ Check if path is already in the database """
+  sql = "select * from files where path='"+filepath+"'"
+  dbcursor.execute(sql)
+  result = dbcursor.fetchall()
+  if result == ():
+    return 0
+  else:
+    return 1
+
+def add_path(db, cursor, timestamp, myfile, filehash):
+  """ Add hash to database """
+  sql = "INSERT INTO files (timestamp, path, hash) VALUES ('%s','%s','%s')" % \
+         (timestamp, myfile, filehash)
+
+  # Run the sql statement rolling back if there is a problem
+  try:
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    db.rollback()
+    print('Error with database insert:')
+    print(e)
+
+def delete_path(db, cursor, timestamp, myfile):
+  """ Delete hash from database """
+  sql = "DELETE FROM files where path='"+myfile+"'"
+
+  # Run the sql statement rolling back if there is a problem
+  try:
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    db.rollback()
+    print('Error with database delete:')
+    print(e)
+
+def get_hash(filepath):
+  """ Create a hash of a file """
+  md5 = hashlib.md5(open(filepath,'rb').read()).hexdigest()
+  return(md5)
+
+def get_zulu_timestamp():
+  ts = datetime.now().isoformat()
+  return(ts)
+
+def get_timestamp():
+  ts = datetime.now().isoformat(timespec='seconds')
+  return(ts)
+
+def check_file_hashes(db,cursor,csvout):
+  """ Check the file hashes of files in the database"""
+  timestamp = get_timestamp()
+  sql = "select * from files"
+  cursor.execute(sql)
+  result = cursor.fetchall()
+  for row in result:
+    hash_timestamp = row[0]
+    filepath = row[1]
+    dbhash = row[2]
+    current_hash = get_hash(filepath)
+    message = 'FILE='+filepath+', OLD_HASH='+dbhash+', OLD_HASH_DATE='+\
+               hash_timestamp+', CURRENT_HASH='+current_hash
+    if current_hash == dbhash:
+      status = 'OK'
     else:
-        print("Invalid command")
+      status = 'File Changed'
+    csvout.writerow([timestamp,'filehash',status,message])
 
+def check_servers(db,cursor,csvout):
+  """ Check the if servers in database respond to a ping"""
+  timestamp = get_timestamp()
+  sql = "select * from servers"
+  cursor.execute(sql)
+  result = cursor.fetchall()
+  for row in result:
+    (ip,ms) = pinglib.pingthis(row[0])
+    
+    message = 'SERVER='+ip+', TIME(MS)='+ms
+    if ms == 'Not Found':
+      status = 'FAIL'
+    else:
+      status = 'OK'
+    csvout.writerow([timestamp,'pingcheck',status,message])
+
+def add_server(db, cursor, myserver):
+  """ Add server to database """
+  sql = "INSERT INTO servers (DNSorIP) VALUES ('%s')" % (myserver)
+
+  # Run the sql statement rolling back if there is a problem
+  try:
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    db.rollback()
+    print('Error with database insert:')
+    print(e)
+
+def delete_server(db, cursor, myserver):
+  """ Delete server from database """
+  sql = "DELETE FROM servers where DNSorIP='"+myserver+"'"
+
+  # Run the sql statement rolling back if there is a problem
+  try:
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    db.rollback()
+    print('Error with database delete:')
+    print(e)
+
+def check_localhost(csvout):
+  """ check for disk space>85% full, 1 CPU load > 2.00, free memory < 25%"""
+  disk_limit = 85
+  cpu_limit = 2.00
+  memory_limit = 25
+  timestamp = get_timestamp()
+
+  # check disk space
+  disk = psutil.disk_usage('/')
+  disk_percent = disk[3]
+  if disk_percent > disk_limit:
+    status = 'FAIL'
+  else:
+    status = 'OK'
+  message = 'DISK_USED='+str(disk_percent)
+  csvout.writerow([timestamp,'host-disk',status,message])
+  
+  # check cpu load
+  load = psutil.getloadavg()
+  load1min = round(load[0],2)
+  if load1min > cpu_limit:
+    status = 'FAIL'
+  else:
+    status = 'OK'
+  message = 'CPU_LOAD='+str(load1min)
+  csvout.writerow([timestamp,'host-cpu',status,message])
+
+  # check free memory
+  mem = psutil.virtual_memory()
+  memfree = round((mem[4]/mem[0])*100,2)
+  if memfree < memory_limit:
+    status = 'FAIL'
+  else:
+    status = 'OK'
+  message = 'FREE_MEM='+str(memfree)
+  csvout.writerow([timestamp,'host-mem',status,message])
+
+
+def usage():
+  """ Usage information"""
+  print('monitor2.py updatehash <filepath>')
+  print('monitor2.py run <time in seconds between runs>')
+  print('monitor2.py addserver <dns or ip>')
+  print('monitor2.py deleteserver <dns or ip>')
+  sys.exit()
+
+# Run main() if script called directly, else use as a library to be imported
 if __name__ == "__main__":
-    main()
+        main()
 
+
+#

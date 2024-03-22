@@ -15,107 +15,99 @@ password = 'Berouz1234!'
 database = 'cmdb'
 table = 'files'
 
-# Function to connect to the MySQL database
-def connect_to_database():
-    try:
-        connection = pymysql.connect(host=host,
-                                     user=user,
-                                     password=password,
-                                     database=database,
-                                     cursorclass=pymysql.cursors.DictCursor)
-        return connection
-    except Exception as e:
-        print(f"Error connecting to the database: {e}")
-        sys.exit(1)
-
-# Function to create the files table if it doesn't exist
-def create_files_table(connection):
-    try:
-        with connection.cursor() as cursor:
-            # Check if the table exists
-            cursor.execute(f"SHOW TABLES LIKE '{table}'")
-            result = cursor.fetchone()
-            if not result:
-                # Create the table if it doesn't exist
-                cursor.execute(f"CREATE TABLE {table} (timestamp VARCHAR(30), path VARCHAR(200), hash VARCHAR(50))")
-                print("Files table created successfully.")
-            else:
-                print("Files table already exists.")
-        connection.commit()
-    except Exception as e:
-        print(f"Error creating files table: {e}")
-        connection.rollback()
-
-# Function to generate MD5 hash of a file
-def generate_file_hash(file_path):
-    try:
-        with open(file_path, "rb") as f:
-            file_hash = hashlib.md5()
-            while chunk := f.read(4096):
-                file_hash.update(chunk)
-        return file_hash.hexdigest()
-    except Exception as e:
-        print(f"Error generating hash for file '{file_path}': {e}")
-        return None
-
-# Function to update or insert file information into the database
-def update_file_info(connection, file_path, file_hash):
-    try:
-        with connection.cursor() as cursor:
-            # Check if the file already exists in the database
-            cursor.execute(f"SELECT * FROM {table} WHERE path=%s", (file_path,))
-            result = cursor.fetchone()
-            timestamp = datetime.utcnow().isoformat()
-            if result:
-                # Update the timestamp and hash if the file already exists
-                cursor.execute(f"UPDATE {table} SET timestamp=%s, hash=%s WHERE path=%s", (timestamp, file_hash, file_path))
-                print(f"File information updated: {file_path}")
-            else:
-                # Insert new file information if it doesn't exist
-                cursor.execute(f"INSERT INTO {table} (timestamp, path, hash) VALUES (%s, %s, %s)", (timestamp, file_path, file_hash))
-                print(f"New file information inserted: {file_path}")
-        connection.commit()
-    except Exception as e:
-        print(f"Error updating file information: {e}")
-        connection.rollback()
-
-# Main function
+# Main routine that is called when script is run
 def main():
-    # Connect to the MySQL database
-    connection = connect_to_database()
+  """Get hash of file on cli and add to database"""
+  # Get the file path
+  if len(sys.argv) != 3:
+    usage()
+  else:
+    myfile = sys.argv[2]
 
-    # Create the files table if it doesn't exist
-    create_files_table(connection)
+  # Check for correct command
+  if sys.argv[1] != 'updatehash':
+    usage()
 
-    # List of file paths to monitor
-    file_paths = [
-        '/etc/hosts',
-        '/etc/group',
-        '/etc/passwd',
-        '/etc/ssh/sshd_config',
-        '/etc/environment',
-        '~/testfile.txt'
-    ]
+  # Create file hash
+  if not os.path.exists(myfile):
+    print(myfile + ' does not exist')
+    usage()
 
-    # Iterate over each file path
-    for file_path in file_paths:
-        # Expand the '~' in the file path
-        file_path = os.path.expanduser(file_path)
-        
-        # Check if the file exists
-        if os.path.exists(file_path):
-            # Generate MD5 hash of the file
-            file_hash = generate_file_hash(file_path)
-            if file_hash:
-                # Update or insert file information into the database
-                update_file_info(connection, file_path, file_hash)
-        else:
-            print(f"File not found: {file_path}")
+  filehash = get_hash(myfile)
 
-    # Close the database connection
-    connection.close()
+  # Create a zulu timestamp
+  timestamp = get_timestamp()
 
-# Run main() if the script is called directly
+  # Connect to database
+  db = pymysql.connect(host=host,user=user,password=passwd,database=database)
+  cursor = db.cursor()
+
+  # Verify the path is not already in the database.  If it is prompt if user
+  # to see if they want to replace the has
+  if path_exists(cursor, myfile ):
+    ans = input('File path exists, do you want to overwrite (Y/N): ')
+    if not ans == 'Y':
+      exit('Exiting without any changes')
+    else:
+      delete_path(db,cursor,timestamp,myfile)
+
+  # Now add the path
+  add_path(db, cursor, timestamp,myfile,filehash)
+  db.close()
+
+# Subroutines
+def path_exists(dbcursor, filepath):
+  """ Check if path is already in the database """
+  sql = "select * from files where path='"+filepath+"'"
+  dbcursor.execute(sql)
+  result = dbcursor.fetchall()
+  if result == ():
+    return 0
+  else:
+    return 1
+
+def add_path(db, cursor, timestamp, myfile, filehash):
+  """ Add hash to database """
+  sql = "INSERT INTO files (timestamp, path, hash) VALUES ('%s','%s','%s')" % \
+         (timestamp, myfile, filehash)
+
+  # Run the sql statement rolling back if there is a problem
+  try:
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    db.rollback()
+    print('Error with database insert:')
+    print(e)
+
+def delete_path(db, cursor, timestamp, myfile):
+  """ Delete hash from database """
+  sql = "DELETE FROM files where path='"+myfile+"'"
+
+  # Run the sql statement rolling back if there is a problem
+  try:
+    cursor.execute(sql)
+    db.commit()
+  except Exception as e:
+    db.rollback()
+    print('Error with database delete:')
+    print(e)
+
+def get_hash(filepath):
+  """ Create a hash of a file """
+  md5 = hashlib.md5(open(filepath,'rb').read()).hexdigest()
+  return(md5)
+
+def get_timestamp():
+  ts = datetime.now().isoformat()
+  return(ts)
+
+def usage():
+  """ Usage information"""
+  print('monitor1.py updatehash <filepath>')
+  sys.exit()
+
+# Run main() if script called directly, else use as a library to be imported
 if __name__ == "__main__":
-    main()
+        main()
 
