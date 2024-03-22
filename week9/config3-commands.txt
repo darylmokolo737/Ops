@@ -1,0 +1,4 @@
+ansible linux1 -m shell -a 'apt -y purge sysstat'
+ansible linux2 -m shell -a 'yum remove sysstat -y'
+ansible linux -m shell -a 'iostat'
+

@@ -1,0 +1,12 @@
+- name: ping linux servers
+  hosts: linux
+  tasks:
+  - name: ping linux
+    action: ping
+
+- name: ping windows servers
+  hosts: windows
+  tasks:
+  - name: ping windows
+    action: win_ping
+

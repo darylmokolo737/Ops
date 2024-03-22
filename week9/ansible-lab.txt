@@ -1,10 +1,110 @@
-Starting Nmap 7.80 ( https://nmap.org ) at 2024-03-17 07:42 PDT
-Nmap scan report for ec2-44-194-66-247.compute-1.amazonaws.com (44.194.66.247)
-Host is up (0.0072s latency).
+ubuntu@ip-172-31-91-157:~$ nmap -A -Pn 3.222.173.35
+Starting Nmap 7.80 ( https://nmap.org ) at 2023-12-12 23:39 PST
+Nmap scan report for ec2-3-222-173-35.compute-1.amazonaws.com (3.222.173.35)
+Host is up (0.0024s latency).
 Not shown: 998 closed ports
 PORT   STATE    SERVICE VERSION
 22/tcp open     ssh     OpenSSH 8.7 (protocol 2.0)
 25/tcp filtered smtp
 
-Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
-Nmap done: 1 IP address (1 host up) scanned in 1.89 seconds
+ubuntu@ip-172-31-91-151:~$ nmap -A -Pn 52.86.151.169
+Starting Nmap 7.80 ( https://nmap.org ) at 2023-12-12 23:45 PST
+Nmap scan report for ec2-52-86-151-169.compute-1.amazonaws.com (52.86.151.169)
+Host is up (0.00074s latency).
+Not shown: 996 filtered ports
+PORT     STATE SERVICE       VERSION
+135/tcp  open  msrpc         Microsoft Windows RPC
+139/tcp  open  netbios-ssn   Microsoft Windows netbios-ssn
+445/tcp  open  microsoft-ds?
+3389/tcp open  ms-wbt-server Microsoft Terminal Services
+| rdp-ntlm-info: 
+|   Target_Name: EC2AMAZ-148I3TO
+|   NetBIOS_Domain_Name: EC2AMAZ-148I3TO
+|   NetBIOS_Computer_Name: EC2AMAZ-148I3TO
+|   DNS_Domain_Name: EC2AMAZ-148I3TO
+|   DNS_Computer_Name: EC2AMAZ-148I3TO
+|   Product_Version: 10.0.20348
+|_  System_Time: 2023-12-13T07:45:28+00:00
+| ssl-cert: Subject: commonName=EC2AMAZ-148I3TO
+| Not valid before: 2023-12-09T06:45:37
+|_Not valid after:  2024-06-09T06:45:37
+|_ssl-date: 2023-12-13T07:46:08+00:00; 0s from scanner time.
+Service Info: OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+| smb2-security-mode: 
+|   2.02: 
+|_    Message signing enabled but not required
+| smb2-time: 
+|   date: 2023-12-13T07:45:33
+|_  start_date: N/A
+
+ubuntu@ip-172-31-87-127:~/ansible$ ansible linux1 -m ping
+The authenticity of host '23.22.187.110 (23.22.187.110)' can't be established.
+ED25519 key fingerprint is SHA256:25kTGOgOYJEJnsa5e+RQFuyPOGiQYEEKo3qVEnoz5W8.
+This key is not known by any other names
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+linux1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+
+ubuntu@ip-172-31-91-151:~/ansible$ ansible linux2 -m ping
+The authenticity of host '3.222.173.35 (3.222.173.35)' can't be established.
+ED25519 key fingerprint is SHA256:Km3xGrc0kDuHJ1wnij8qgL6/4jAByjnAvdrQ1bQhjz0.
+This key is not known by any other names
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+linux2 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+ubuntu@ip-172-31-91-151:~/ansible$ ansible linux -a "df -h"
+linux2 | CHANGED | rc=0 >>
+Filesystem      Size  Used Avail Use% Mounted on
+devtmpfs        4.0M     0  4.0M   0% /dev
+tmpfs           881M     0  881M   0% /dev/shm
+tmpfs           353M  9.3M  343M   3% /run
+/dev/xvda4      9.2G  1.5G  7.7G  16% /
+/dev/xvda3      536M  162M  375M  31% /boot
+/dev/xvda2      200M  7.0M  193M   4% /boot/efi
+tmpfs           177M     0  177M   0% /run/user/0
+linux1 | CHANGED | rc=0 >>
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       7.6G  3.9G  3.7G  52% /
+tmpfs           979M  148K  978M   1% /dev/shm
+tmpfs           392M  876K  391M   1% /run
+tmpfs           5.0M     0  5.0M   0% /run/lock
+/dev/xvda15     105M  6.1M   99M   6% /boot/efi
+tmpfs           196M  4.0K  196M   1% /run/user/1000
+tmpfs           196M  4.0K  196M   1% /run/user/0
+
+ubuntu@ip-172-31-91-151:~/ansible$ ansible windows1 -m win_ping
+windows1 | SUCCESS => {
+    "changed": false,
+    "ping": "pong"
+}
+ubuntu@ip-172-31-91-151:~/ansible$ ansible windows1 -m win_shell -a 'gci c:\'
+windows1 | CHANGED | rc=0 >>
+
+
+    Directory: C:\
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----         8/18/2021  11:24 PM                EFI
+d-----          5/8/2021   1:20 AM                PerfLogs
+d-r---         12/9/2023  11:27 PM                Program Files
+d-----         7/11/2023   7:40 PM                Program Files (x86)
+d-----         12/9/2023  11:18 PM                Python312
+d-----         12/9/2023  11:17 PM                tools
+d-r---         12/9/2023  10:45 PM                Users
+d-----         12/9/2023  11:18 PM                Windows
+
+

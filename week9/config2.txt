@@ -1,0 +1,17 @@
+1. ansible all -m gather_facts | grep -i ansible_os_family
+2. ansible all -m gather_facts | grep ansible_distribution_version
+3. ansible all -m gather_facts | grep -i fqdn
+4. ansible all -m gather_facts | grep -i ansible.*shell
+5. ansible linux -m shell -a 'ls -l /'
+6. ansible linux -m shell -a 'df -h'
+   ansible windows -m win_shell -a 'Get-WMIObject Win32_Logicaldisk'
+7. ansible windows -m win_shell -a 'Get-Process'
+8. ansible linux -m shell -a "mkdir /TEST"
+   ansible windows -m win_shell -a "md c:\TEST"
+9. ansible linux -m copy -a 'src=/home/ubuntu/testfile.txt dest=/TEST/testfile.txt'
+   ansible windows -m copy -a 'src=/home/ubuntu/testfile.txt dest=c:/TEST/testfile.txt'
+10. ansible linux -m shell -a 'ls -l /TEST'
+    ansible windows -m win_shell -a 'gci c:\TEST'
+11. ansible linux -m shell -a 'ls -ld /TEST'
+    ansible windows -m win_shell -a 'get-acl c:\TEST'
+
