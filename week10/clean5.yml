@@ -1,0 +1,33 @@
+- name: configure linux server
+  hosts: linux
+  gather_facts: yes
+  tasks:
+  - name: system vimrc file
+    file:
+      state: absent
+      path: "/etc/vimrc"
+      
+  - name: ubuntu install
+    apt:
+      state: absent
+      name:
+        - sysstat
+        - chrony
+    when:
+      - ansible_facts['distribution'] == "Ubuntu"
+
+  - name: redhat install
+    yum:
+      state: latest
+      name:
+        - sysstat
+        - chrony
+    when:
+      - ansible_facts['distribution'] == "RedHat"
+
+  - name: create localadmin as admin user in sudo group
+    user:
+      name: localadmin
+      state: absent
+      remove: yes
+

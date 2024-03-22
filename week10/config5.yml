@@ -1,0 +1,76 @@
+# gather_facts is needed so we can tell which OS we are on
+# the when clauses limit the section to a single OS
+- name: configure linux server
+  hosts: linux
+  gather_facts: yes
+  tasks:
+  - name: system vimrc file
+    copy:
+      src: "/home/ubuntu/vimrc"
+      dest: "/etc/vimrc"
+      mode: '0644'
+      owner: root
+      group: root
+      
+  - name: ubuntu install
+    apt:
+      state: latest
+      name:
+        - python3
+        - git
+        - sysstat
+        - chrony
+    when:
+      - ansible_facts['distribution'] == "Ubuntu"
+
+  - name: redhat install
+    yum:
+      state: latest
+      name:
+        - python3
+        - git
+        - sysstat
+        - chrony
+    when:
+      - ansible_facts['distribution'] == "RedHat"
+
+  - name: set timezone
+    timezone:
+      name: America/Los_Angeles
+
+  - name: create localadmin as admin user in sudo group
+    user:
+      name: localadmin
+      comment: Local Admin user
+      generate_ssh_key: yes
+      ssh_key_bits: 2048
+      ssh_key_file: .ssh/id_rsa 
+      groups: sudo
+    when:
+      - ansible_facts['distribution'] == "Ubuntu"
+
+  - name: create localadmin as admin user in wheel group
+    user:
+      name: localadmin
+      comment: Local Admin user
+      generate_ssh_key: yes
+      ssh_key_bits: 2048
+      ssh_key_file: .ssh/id_rsa 
+      groups: wheel
+    when:
+      - ansible_facts['distribution'] == "RedHat"
+
+  - name: ubuntu update
+    apt:
+      state: latest
+      name: '*'
+      update_cache: yes
+    when:
+      - ansible_facts['distribution'] == "Ubuntu"
+
+  - name: update redhat
+    yum:
+      name: '*'
+      state: latest
+    when:
+      - ansible_facts['distribution'] == "RedHat"

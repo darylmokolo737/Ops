@@ -1,0 +1,33 @@
+ name: configure windows server
+  hosts: windows
+  gather_facts: no
+  tasks:
+  - name: Delete User1
+    win_user:
+      name: User1
+      password: red-passphrase-Three
+      state: absent
+      
+  - name: Delete Group1
+    win_group:
+      name: Group1
+      description: Test Group
+      state: absent
+
+  - name: Delete Shared directory
+    win_file:
+      path: c:\Shared
+      state: absent
+
+  - name: Remove the Shared directory Share
+    win_share:
+      name: Shared
+      path: c:\Shared
+      state: absent
+
+  - name: uninstall openssh
+    win_chocolatey: 
+      name: openssh
+      state: absent
+      package_params: "/SSHServerFeature"
+

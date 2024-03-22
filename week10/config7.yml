@@ -1,0 +1,34 @@
+- name: check_file
+  hosts: linux
+  gather_facts: no
+
+  vars:
+    hosts_hash: 1463508f28edb4d6d5ae349b20e00409
+    group_hash: 2d50df1a68f2b6a7089ff1511e50d7f1
+    passwd_hash: a07b8000caf4adb5ad6e2201510fe580
+    sshd_config_hash: 23a8a2b1a8f1538be49eb86313367191
+    environment_hash: f3377ed52072acbbf4cbb59af03c7fdb
+    
+  tasks:
+  - name: check files for changes
+
+    # this gets the current checksum of the file
+    stat: 
+      path: '{{ item.file }}'
+      checksum_algorithm: md5
+
+    # and we save it to the current variable
+    register: current
+
+    # when they are not equal, we say they are changed
+    changed_when: item.hash != current.stat.checksum
+    failed_when: False
+
+    # loop through all the file paths
+    loop:
+      - { file: /etc/hosts, hash: '{{ hosts_hash }}' }
+      - { file: /etc/group, hash: '{{ group_hash }}' }
+      - { file: /etc/passwd, hash: '{{ passwd_hash }}' }
+      - { file: /etc/ssh/sshd_config, hash: '{{ sshd_config_hash }}' }
+      - { file: /etc/environment, hash: '{{ environment_hash }}' }
+

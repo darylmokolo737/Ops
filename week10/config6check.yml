@@ -1,0 +1,34 @@
+- name: check for windows updates
+  hosts: windows
+  gather_facts: no
+  tasks:
+
+  # Need to do this because update check appends to the file
+  - name: delete old update.txt file
+    win_file:
+      path: C:\updates.txt
+      state: absent
+
+  - name: check all updates
+    win_updates:
+      state: searched
+      log_path: C:\updates.txt
+
+  # Do this to pick out the updates from the file and save them to a var
+  - name: list update
+    win_shell: findstr /r /c:"    .*title" C:\updates.txt
+    register: update_check_result
+    failed_when: false
+    
+  # only do this if the list updates succeeded in finding an update
+  - name: show updates
+    debug: 
+      msg="{{ update_check_result.stdout_lines }}"
+    when: update_check_result.rc == 0
+  
+  # only do this if the list updates failed in finding an update
+  - name: no updates
+    debug: 
+      msg="No updates available"
+    when: update_check_result.rc != 0
+

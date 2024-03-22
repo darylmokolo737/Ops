@@ -1,0 +1,11 @@
+- name: install windows updates
+  hosts: windows
+  gather_facts: no
+  tasks:
+
+  - name: install all updates
+    win_updates:
+      category_names: '*'
+      reboot: true
+
+

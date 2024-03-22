@@ -1,0 +1,51 @@
+- name: configure windows server
+  hosts: windows
+  gather_facts: no
+  tasks:
+  - name: create User1
+    win_user:
+      name: User1
+      password: red-passphrase-Three
+      state: present
+      
+  - name: create Group1
+    win_group:
+      name: Group1
+      description: Test Group
+      state: present
+
+  - name: Add User1 to Group1
+    win_group_membership:
+      name: Group1
+      members:
+        - User1
+      state: present
+
+  - name: Create Shared directory
+    win_file:
+      path: c:\Shared
+      state: directory
+
+  - name: Share the Shared directory
+    win_share:
+      name: Shared
+      description: Shared Directory
+      path: c:\Shared
+      list: yes
+      full: Group1
+
+  - name: Allow Group1 to Shared
+    win_acl:
+      path: c:\Shared
+      user: Group1
+      rights: FullControl
+      type: allow
+      state: present
+  
+  # Need to use /SSHServerFeature to get the server install
+  - name: install openssh
+    win_chocolatey: 
+      name: openssh
+      state: present
+      package_params: "/SSHServerFeature"
+
