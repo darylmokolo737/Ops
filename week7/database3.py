@@ -1,11 +1,9 @@
-# script inserts server information into a MySQL database.
-### DM-1192024
+#!/usr/bin/python3
+### Script to perform a syn scan on a network subnet using python3-nmap library.
+### DM-1102024
 
-import platform
-import psutil
-import subprocess
 import pymysql
-import sys
+import serverinfo1
 
 # Initial variables and imports
 host = 'localhost'
@@ -14,54 +12,49 @@ password = 'Berouz1234!'
 database = 'cmdb'
 table = 'device'
 
-# Function to connect to the MySQL database
-def connect_to_database():
-    try:
-        connection = pymysql.connect(host=host,
-                                     user=user,
-                                     password=password,
-                                     database=database,
-                                     cursorclass=pymysql.cursors.DictCursor)
-                    
-        return connection
-    except Exception as e:
-        print(f"Error connecting to the database: {e}")
-        sys.exit(1)
-
-# Function to insert server information into the database
-def insert_server_info(connection):
-    try:
-        with connection.cursor() as cursor:
-        # Get and format server information
-            name = platform.node()
-            cpu_count = psutil.cpu_count(logical=False)
-            ram = round(psutil.virtual_memory().total / (1024 ** 3), 2)
-            os_type = platform.system()
-            os_version = platform.release()
-
-        # Insert data into the device table
-            sql_query = f"INSERT INTO {table} (name, cpucount, ram, ostype, osversion ) VALUES (%s, %s, %s, %s, %s)"
-            cursor.execute(sql_query, (name, cpu_count, ram, os_type, os_version))
-
-    # Commit the transaction
-        connection.commit()
-        print("Server information inserted successfully.")
-    except Exception as e:
-        print(f"Error inserting server information: {e}")
-        connection.rollback()
-
-# Main function
+# Main routine that is called when script is run
 def main():
+    """Add system information to database"""
+    # Get the server information
+    info = get_server_info()
+
     # Connect to the database
-    connection = connect_to_database()
+    db = pymysql.connect(host=host, user=user, password=password, database=database)
+    cursor = db.cursor()
 
-    # Insert server information into the database
-    insert_server_info(connection)
+    # Prepare SQL statement
+    sql = "INSERT INTO device (name, macaddress, ip, cpucount, disks, ram, ostype, osversion) \
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
 
-    # Close the database connection
-    connection.close()
+    # Execute SQL statement
+    try:
+        cursor.execute(sql, (info["Hostname"], info["MAC Addr"], info["IP Addr"], \
+                             info["CPU (count)"], info["Disks (Count)"], info["RAM (GB)"], \
+                             info["OSType"], info["OSVersion"]))
+        db.commit()
+        print("Inserted server information into database successfully!")
+    except Exception as e:
+        db.rollback()
+        print("Error inserting server information into database:", e)
+    finally:
+        db.close()
 
-# Run main() if the script is called directly
+# Function to get server information using serverinfo1.py
+def get_server_info():
+    """Use serverinfo1 as a library to get system information"""
+    sinfo = {}
+    sinfo['Hostname'] = serverinfo1.get_hostname()
+    sinfo['CPU (count)'] = serverinfo1.get_cpu_count()
+    sinfo["RAM (GB)"] = serverinfo1.get_ram()
+    sinfo["OSType"] = serverinfo1.get_ostype()
+    sinfo["OSVersion"] = serverinfo1.get_osversion()
+    sinfo["Disks (Count)"] = serverinfo1.get_disk_count()
+    ip, mac = serverinfo1.get_eth0_ip_mac()
+    sinfo["IP Addr"] = ip
+    sinfo["MAC Addr"] = mac
+    return sinfo
+
+# Run main() if script called directly
 if __name__ == "__main__":
     main()
 
