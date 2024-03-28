@@ -1,7 +1,6 @@
 # Opperation
 
-
-Security maintenance scripts.
+Security maintenance scripts to ensure business optimization and availability. 
 
 
 
